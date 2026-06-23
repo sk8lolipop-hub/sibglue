@@ -6,7 +6,7 @@
     <title>Холст | СИБКЛЕЙ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Подключаем VK SDK -->
-    <script src="https://unpkg.com/@vkid/sdk@<2.0.0/dist-sdk/client-sdk.min.js"></script>
+    <script src="https://vk.com/js/api/openapi.js?169" type="text/javascript"></script>
 </head>
 <body class="bg-[#121212] text-white">
     <nav class="p-6 flex justify-between items-center">
@@ -20,8 +20,8 @@
         <header class="text-center mb-20">
             <h1 class="text-[15vw] font-black uppercase leading-none mb-8">Холст</h1>
             
-            <!-- Контейнер для кнопки VK ID -->
-            <div id="VkIdSdkView" class="flex justify-center"></div>
+            <!-- Контейнер для кнопки -->
+            <div id="vk_auth" class="flex justify-center"></div>
         </header>
 
         <!-- Область холста -->
@@ -40,44 +40,26 @@
         </div>
     </main>
 
-    <script>
-        window.onload = function() {
-            if (window.VKIDSDK) {
-                const VKID = window.VKIDSDK;
+    <script type="text/javascript">
+        VK.init({apiId: 54649279});
 
-                VKID.Config.init({
-                    app: 54649279,
-                    redirectUrl: 'https://sk8lolipop-hub.github.io/sibglue/canvas.html',
-                    responseMode: VKID.ConfigResponseMode.Callback // Используем колбэк вместо редиректа для надежности
-                });
-
-                const oneTap = new VKID.OneTap();
-
-                oneTap.render({
-                    container: document.getElementById('VkIdSdkView'),
-                    scheme: 'dark',
-                    lang: 'rus'
-                }).on(VKID.WidgetEvents.ON_LOGIN_SUCCESS, (payload) => {
-                    // Обработка успешного входа
-                    document.getElementById('VkIdSdkView').classList.add('hidden');
-                    document.getElementById('upload-section').classList.remove('hidden');
-                    document.getElementById('canvas-placeholder').innerText = 'Холст готов к работе';
-                    document.getElementById('user-status').innerText = 'Вы вошли';
-                });
+        function authInfo(response) {
+            if (response.session) {
+                // Пользователь авторизован
+                document.getElementById('vk_auth').classList.add('hidden');
+                document.getElementById('upload-section').classList.remove('hidden');
+                document.getElementById('canvas-placeholder').innerText = 'Холст готов к работе';
+                document.getElementById('user-status').innerText = 'Вы вошли';
             } else {
-                console.error('VK ID SDK не загружен');
-                document.getElementById('VkIdSdkView').innerHTML = '<p class="text-red-500">Ошибка загрузки VK SDK. Проверьте подключение.</p>';
+                // Пользователь не авторизован
+                console.log('Не удалось авторизоваться');
             }
-        };
-
-        // Проверка параметров в URL (если был редирект)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('payload')) {
-            document.getElementById('VkIdSdkView').classList.add('hidden');
-            document.getElementById('upload-section').classList.remove('hidden');
-            document.getElementById('canvas-placeholder').innerText = 'Холст готов к работе';
-            document.getElementById('user-status').innerText = 'Вы вошли';
         }
+
+        VK.Widgets.Auth("vk_auth", {width: "300px", onAuth: authInfo});
+        
+        // Проверяем статус при загрузке
+        VK.Auth.getLoginStatus(authInfo);
     </script>
 </body>
 </html>
