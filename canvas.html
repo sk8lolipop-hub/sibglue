@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Холст | СИБКЛЕЙ</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Подключаем VK SDK -->
-    <script src="https://vk.com/js/api/openapi.js?169" type="text/javascript"></script>
+    <!-- Подключаем VK ID SDK -->
+    <script src="https://unpkg.com/@vkid/sdk@<2.0.0/dist-sdk/client-sdk.min.js"></script>
 </head>
 <body class="bg-[#121212] text-white">
     <nav class="p-6 flex justify-between items-center">
@@ -21,7 +21,7 @@
             <h1 class="text-[15vw] font-black uppercase leading-none mb-8">Холст</h1>
             
             <!-- Контейнер для кнопки -->
-            <div id="vk_auth" class="flex justify-center"></div>
+            <div id="VkIdSdkView" class="flex justify-center"></div>
         </header>
 
         <!-- Область холста -->
@@ -41,26 +41,38 @@
     </main>
 
     <script type="text/javascript">
-        // Инициализация с явным указанием домена
-        VK.init({
-            apiId: 54649279,
-            onlyWidgets: true
-        });
+        if (window.VKIDSDK) {
+            const VKID = window.VKIDSDK;
 
-        function authInfo(response) {
-            if (response.session) {
-                document.getElementById('vk_auth').classList.add('hidden');
-                document.getElementById('upload-section').classList.remove('hidden');
-                document.getElementById('canvas-placeholder').innerText = 'Холст готов к работе';
-                document.getElementById('user-status').innerText = 'Вы вошли';
-            }
+            VKID.Config.init({
+                app: 54649279,
+                redirectUrl: 'https://sk8lolipop-hub.github.io/sibglue/canvas.html',
+                responseMode: VKID.ConfigResponseMode.Callback
+            });
+
+            const oneTap = new VKID.OneTap();
+
+            oneTap.render({
+                container: document.getElementById('VkIdSdkView'),
+                scheme: 'dark',
+                lang: 'rus'
+            }).on(VKID.WidgetEvents.ON_LOGIN_SUCCESS, (payload) => {
+                showUpload();
+            });
         }
 
-        // Отрисовка виджета
-        VK.Widgets.Auth("vk_auth", {
-            width: "300px", 
-            onAuth: authInfo
-        });
+        function showUpload() {
+            document.getElementById('VkIdSdkView').classList.add('hidden');
+            document.getElementById('upload-section').classList.remove('hidden');
+            document.getElementById('canvas-placeholder').innerText = 'Холст готов к работе';
+            document.getElementById('user-status').innerText = 'Вы вошли';
+        }
+
+        // Проверка, если уже вошли
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('payload')) {
+            showUpload();
+        }
     </script>
 </body>
 </html>
