@@ -45,11 +45,13 @@
 
     <script type="text/javascript">
         const APP_ID = 54649279;
-        const REDIRECT_URL = 'https://sk8lolipop-hub.github.io/sibglue/canvas.html';
+        
+        // Автоматически определяем текущий URL без лишних параметров
+        const CURRENT_URL = window.location.origin + window.location.pathname;
 
         document.getElementById('custom-vk-login').addEventListener('click', () => {
-            // Прямая ссылка на авторизацию VK
-            const authUrl = `https://oauth.vk.com/authorize?client_id=${APP_ID}&display=page&redirect_uri=${REDIRECT_URL}&response_type=token&v=5.131`;
+            // Формируем ссылку: используем текущий URL как redirect_uri
+            const authUrl = `https://oauth.vk.com/authorize?client_id=${APP_ID}&display=page&redirect_uri=${encodeURIComponent(CURRENT_URL)}&response_type=token&v=5.131`;
             window.location.href = authUrl;
         });
 
@@ -60,9 +62,11 @@
             document.getElementById('user-status').innerText = 'Вы вошли';
         }
 
-        // Проверяем, есть ли токен в URL после возвращения от VK
-        if (window.location.hash.includes('access_token') || window.location.search.includes('payload')) {
+        // Проверяем наличие токена в хэше (VK возвращает его после #)
+        if (window.location.hash.includes('access_token')) {
             showUpload();
+            // Очищаем хэш для чистоты URL
+            history.pushState("", document.title, window.location.pathname + window.location.search);
         }
     </script>
 </body>
