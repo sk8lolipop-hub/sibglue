@@ -41,30 +41,38 @@
     </main>
 
     <script>
-        const VKID = window.VKIDSDK;
+        window.onload = function() {
+            if (window.VKIDSDK) {
+                const VKID = window.VKIDSDK;
 
-        VKID.Config.init({
-            app: 54649279, // Твой App ID
-            redirectUrl: 'https://sk8lolipop-hub.github.io/sibglue/canvas.html',
-        });
+                VKID.Config.init({
+                    app: 54649279,
+                    redirectUrl: 'https://sk8lolipop-hub.github.io/sibglue/canvas.html',
+                    responseMode: VKID.ConfigResponseMode.Callback // Используем колбэк вместо редиректа для надежности
+                });
 
-        const oneTap = new VKID.OneTap();
+                const oneTap = new VKID.OneTap();
 
-        // Отрисовка кнопки
-        oneTap.render({
-            container: document.getElementById('VkIdSdkView'),
-            scheme: 'dark',
-            lang: 'rus'
-        }).on(VKID.WidgetEvents.ERROR, (error) => {
-            console.error(error);
-        });
+                oneTap.render({
+                    container: document.getElementById('VkIdSdkView'),
+                    scheme: 'dark',
+                    lang: 'rus'
+                }).on(VKID.WidgetEvents.ON_LOGIN_SUCCESS, (payload) => {
+                    // Обработка успешного входа
+                    document.getElementById('VkIdSdkView').classList.add('hidden');
+                    document.getElementById('upload-section').classList.remove('hidden');
+                    document.getElementById('canvas-placeholder').innerText = 'Холст готов к работе';
+                    document.getElementById('user-status').innerText = 'Вы вошли';
+                });
+            } else {
+                console.error('VK ID SDK не загружен');
+                document.getElementById('VkIdSdkView').innerHTML = '<p class="text-red-500">Ошибка загрузки VK SDK. Проверьте подключение.</p>';
+            }
+        };
 
-        // Проверка, вернулся ли пользователь после авторизации
+        // Проверка параметров в URL (если был редирект)
         const urlParams = new URLSearchParams(window.location.search);
-        const payload = urlParams.get('payload');
-
-        if (payload) {
-            // Если есть payload, значит вход выполнен успешно
+        if (urlParams.get('payload')) {
             document.getElementById('VkIdSdkView').classList.add('hidden');
             document.getElementById('upload-section').classList.remove('hidden');
             document.getElementById('canvas-placeholder').innerText = 'Холст готов к работе';
