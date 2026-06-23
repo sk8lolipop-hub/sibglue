@@ -41,25 +41,26 @@
     </main>
 
     <script type="text/javascript">
-        VK.init({apiId: 54649279});
+        // Инициализация с явным указанием домена
+        VK.init({
+            apiId: 54649279,
+            onlyWidgets: true
+        });
 
         function authInfo(response) {
             if (response.session) {
-                // Пользователь авторизован
                 document.getElementById('vk_auth').classList.add('hidden');
                 document.getElementById('upload-section').classList.remove('hidden');
                 document.getElementById('canvas-placeholder').innerText = 'Холст готов к работе';
                 document.getElementById('user-status').innerText = 'Вы вошли';
-            } else {
-                // Пользователь не авторизован
-                console.log('Не удалось авторизоваться');
             }
         }
 
-        VK.Widgets.Auth("vk_auth", {width: "300px", onAuth: authInfo});
-        
-        // Проверяем статус при загрузке
-        VK.Auth.getLoginStatus(authInfo);
+        // Отрисовка виджета
+        VK.Widgets.Auth("vk_auth", {
+            width: "300px", 
+            onAuth: authInfo
+        });
     </script>
 </body>
 </html>
